@@ -24,7 +24,15 @@ const textNodes = {
   moodLabel: document.getElementById('mood-label'),
   durationLabel: document.getElementById('duration-label'),
   resultTitle: document.getElementById('result-title'),
-  footer: document.getElementById('footer-note')
+  footer: document.getElementById('footer-note'),
+  menuHome: document.getElementById('menu-home'),
+  menuCreate: document.getElementById('menu-create'),
+  menuStudio: document.getElementById('menu-studio'),
+  menuExplore: document.getElementById('menu-explore'),
+  menuLibrary: document.getElementById('menu-library'),
+  menuSettings: document.getElementById('menu-settings'),
+  searchLabel: document.getElementById('search-label'),
+  searchInput: document.getElementById('search-input')
 };
 
 const demoTracks = [
@@ -56,6 +64,14 @@ const i18n = {
     durationLabel: 'Độ dài',
     resultTitle: 'Bản nhạc AI của bạn',
     footer: 'Demo giao diện tạo nhạc AI. Tích hợp API thật bằng cách thay phần mô phỏng trong script.js.',
+    menuHome: 'Home',
+    menuCreate: 'Create',
+    menuStudio: 'Studio',
+    menuExplore: 'Explore',
+    menuLibrary: 'Library',
+    menuSettings: 'Settings',
+    searchLabel: 'Search',
+    searchPlaceholder: 'Tìm bài hát, nghệ sĩ...',
     generate: '✨ Tạo nhạc',
     generating: 'Đang tạo...',
     idleStatus: 'Chưa có bản nhạc nào. Hãy nhập mô tả để bắt đầu.',
@@ -84,6 +100,14 @@ const i18n = {
     durationLabel: 'Duration',
     resultTitle: 'Your AI track',
     footer: 'AI music generator UI demo. Integrate a real API by replacing the mock logic in script.js.',
+    menuHome: 'Home',
+    menuCreate: 'Create',
+    menuStudio: 'Studio',
+    menuExplore: 'Explore',
+    menuLibrary: 'Library',
+    menuSettings: 'Settings',
+    searchLabel: 'Search',
+    searchPlaceholder: 'Search tracks, artists...',
     generate: '✨ Generate music',
     generating: 'Generating...',
     idleStatus: 'No track generated yet. Enter a prompt to begin.',
@@ -112,6 +136,14 @@ const i18n = {
     durationLabel: 'Durée',
     resultTitle: 'Votre morceau IA',
     footer: 'Démo d’interface de génération musicale IA. Intégrez une vraie API en remplaçant la logique simulée dans script.js.',
+    menuHome: 'Accueil',
+    menuCreate: 'Créer',
+    menuStudio: 'Studio',
+    menuExplore: 'Explorer',
+    menuLibrary: 'Bibliothèque',
+    menuSettings: 'Paramètres',
+    searchLabel: 'Recherche',
+    searchPlaceholder: 'Rechercher des titres, artistes...',
     generate: '✨ Générer de la musique',
     generating: 'Génération...',
     idleStatus: 'Aucun morceau généré. Saisissez une description pour commencer.',
@@ -147,6 +179,14 @@ function applyLanguage(lang) {
   textNodes.durationLabel.textContent = t.durationLabel;
   textNodes.resultTitle.textContent = t.resultTitle;
   textNodes.footer.innerHTML = `${t.footer.replace('script.js', '<code>script.js</code>')}`;
+  textNodes.menuHome.textContent = t.menuHome;
+  textNodes.menuCreate.textContent = t.menuCreate;
+  textNodes.menuStudio.textContent = t.menuStudio;
+  textNodes.menuExplore.textContent = t.menuExplore;
+  textNodes.menuLibrary.textContent = t.menuLibrary;
+  textNodes.menuSettings.textContent = t.menuSettings;
+  textNodes.searchLabel.textContent = t.searchLabel;
+  textNodes.searchInput.placeholder = t.searchPlaceholder;
 
   promptInput.placeholder = t.promptPlaceholder;
   generateBtn.textContent = t.generate;
