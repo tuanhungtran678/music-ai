@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Music Studio</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="hero">
+        <p class="badge">🎵 AI Music Studio</p>
+        <h1>Tạo nhạc bằng AI trong vài giây</h1>
+        <p class="subtitle">
+          Nhập ý tưởng, chọn phong cách và để AI tạo bản demo nhạc phù hợp cho bạn.
+        </p>
+      </header>
+
+      <section class="panel" aria-label="Trình tạo nhạc">
+        <form id="music-form" class="form-grid">
+          <label>
+            Mô tả bài nhạc
+            <textarea
+              id="prompt"
+              placeholder="Ví dụ: Bài lo-fi chill cho buổi tối mưa, nhịp nhẹ, piano mềm"
+              required
+            ></textarea>
+          </label>
+
+          <div class="row">
+            <label>
+              Thể loại
+              <select id="genre">
+                <option>Lo-fi</option>
+                <option>Pop</option>
+                <option>EDM</option>
+                <option>Cinematic</option>
+                <option>Jazz</option>
+              </select>
+            </label>
+
+            <label>
+              Tâm trạng
+              <select id="mood">
+                <option>Thư giãn</option>
+                <option>Vui tươi</option>
+                <option>Hùng tráng</option>
+                <option>Sâu lắng</option>
+                <option>Năng lượng cao</option>
+              </select>
+            </label>
+
+            <label>
+              Độ dài
+              <select id="duration">
+                <option>30 giây</option>
+                <option>60 giây</option>
+                <option>90 giây</option>
+              </select>
+            </label>
+          </div>
+
+          <button type="submit" id="generate-btn">✨ Tạo nhạc</button>
+        </form>
+      </section>
+
+      <section class="panel" aria-live="polite" id="result-panel">
+        <h2>Bản nhạc AI của bạn</h2>
+        <p id="status">Chưa có bản nhạc nào. Hãy nhập mô tả để bắt đầu.</p>
+
+        <div class="track" hidden id="track-card">
+          <h3 id="track-title"></h3>
+          <p id="track-meta"></p>
+          <audio id="audio-player" controls></audio>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <small>
+        Demo giao diện tạo nhạc AI. Tích hợp API thật bằng cách thay phần mô phỏng trong
+        <code>script.js</code>.
+      </small>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

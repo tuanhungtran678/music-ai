@@ -1,0 +1,136 @@
+:root {
+  color-scheme: dark;
+  --bg: #0f1021;
+  --surface: #1a1b33;
+  --surface-2: #23264a;
+  --text: #f2f4ff;
+  --muted: #b9c0ff;
+  --primary: #7f8cff;
+  --primary-2: #53d8fb;
+  --border: #353862;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: radial-gradient(circle at top, #1a1c3d 0%, var(--bg) 60%);
+  color: var(--text);
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+
+.app {
+  width: min(960px, 92vw);
+  margin: 2rem auto;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.hero {
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(127, 140, 255, 0.2);
+  border: 1px solid rgba(127, 140, 255, 0.5);
+  margin-bottom: 0.5rem;
+}
+
+h1 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+}
+
+.subtitle {
+  margin: 0 auto;
+  max-width: 56ch;
+  color: var(--muted);
+}
+
+.panel {
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+}
+
+.form-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+label {
+  display: grid;
+  gap: 0.45rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+textarea,
+select,
+button {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #111328;
+  color: var(--text);
+  padding: 0.7rem 0.85rem;
+  font: inherit;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.row {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--primary), var(--primary-2));
+  color: #091025;
+}
+
+button:hover {
+  filter: brightness(1.08);
+}
+
+.track {
+  margin-top: 1rem;
+  padding: 0.85rem;
+  border-radius: 12px;
+  background: rgba(83, 216, 251, 0.08);
+  border: 1px solid rgba(83, 216, 251, 0.25);
+}
+
+audio {
+  width: 100%;
+}
+
+#status {
+  color: var(--muted);
+}
+
+footer {
+  text-align: center;
+  color: var(--muted);
+  padding: 0.8rem;
+}
+
+code {
+  color: #86f7ff;
+}
