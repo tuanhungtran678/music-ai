@@ -5,6 +5,10 @@ const trackTitle = document.getElementById('track-title');
 const trackMeta = document.getElementById('track-meta');
 const audioPlayer = document.getElementById('audio-player');
 const generateBtn = document.getElementById('generate-btn');
+const publishBtn = document.getElementById('publish-btn');
+const publishPanel = document.getElementById('publish-panel');
+const publishTitle = document.getElementById('publish-title');
+const publishedList = document.getElementById('published-list');
 
 const languageSelect = document.getElementById('language');
 const modelSelect = document.getElementById('model');
@@ -35,20 +39,8 @@ const textNodes = {
   searchInput: document.getElementById('search-input')
 };
 
-const demoTracks = [
-  {
-    title: 'Neon Rain Lo-fi',
-    url: 'https://cdn.pixabay.com/download/audio/2022/10/30/audio_9f5f46b5e7.mp3?filename=chill-lofi-hip-hop-beat-127465.mp3'
-  },
-  {
-    title: 'Skyline Pop Drive',
-    url: 'https://cdn.pixabay.com/download/audio/2021/12/24/audio_d6f892d11d.mp3?filename=future-bass-beat-12538.mp3'
-  },
-  {
-    title: 'Night Jazz Echo',
-    url: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_eb7ca6f7d6.mp3?filename=chill-jazz-lofi-vibes-21257.mp3'
-  }
-];
+let latestTrack = null;
+let publishedTracks = [];
 
 const i18n = {
   vi: {
@@ -72,6 +64,10 @@ const i18n = {
     menuSettings: 'Settings',
     searchLabel: 'Search',
     searchPlaceholder: 'Tìm bài hát, nghệ sĩ...',
+    publish: '📢 Publish',
+    publishTitle: 'Published songs',
+    publishDone: 'Đã đăng bài hát thành công.',
+    publishEmpty: 'Chưa có bài nào được đăng.',
     generate: '✨ Tạo nhạc',
     generating: 'Đang tạo...',
     idleStatus: 'Chưa có bản nhạc nào. Hãy nhập mô tả để bắt đầu.',
@@ -83,6 +79,7 @@ const i18n = {
     duration: 'Độ dài',
     model: 'Model',
     idea: 'Ý tưởng',
+    publishedAt: 'Đăng lúc',
     genres: ['Lo-fi', 'Pop', 'EDM', 'Cinematic', 'Jazz'],
     moods: ['Thư giãn', 'Vui tươi', 'Hùng tráng', 'Sâu lắng', 'Năng lượng cao'],
     durations: ['30 giây', '60 giây', '90 giây']
@@ -108,6 +105,10 @@ const i18n = {
     menuSettings: 'Settings',
     searchLabel: 'Search',
     searchPlaceholder: 'Search tracks, artists...',
+    publish: '📢 Publish',
+    publishTitle: 'Published songs',
+    publishDone: 'Song published successfully.',
+    publishEmpty: 'No published songs yet.',
     generate: '✨ Generate music',
     generating: 'Generating...',
     idleStatus: 'No track generated yet. Enter a prompt to begin.',
@@ -119,6 +120,7 @@ const i18n = {
     duration: 'Duration',
     model: 'Model',
     idea: 'Idea',
+    publishedAt: 'Published at',
     genres: ['Lo-fi', 'Pop', 'EDM', 'Cinematic', 'Jazz'],
     moods: ['Relaxed', 'Happy', 'Epic', 'Melancholic', 'High energy'],
     durations: ['30 seconds', '60 seconds', '90 seconds']
@@ -144,6 +146,10 @@ const i18n = {
     menuSettings: 'Paramètres',
     searchLabel: 'Recherche',
     searchPlaceholder: 'Rechercher des titres, artistes...',
+    publish: '📢 Publier',
+    publishTitle: 'Morceaux publiés',
+    publishDone: 'Morceau publié avec succès.',
+    publishEmpty: 'Aucun morceau publié.',
     generate: '✨ Générer de la musique',
     generating: 'Génération...',
     idleStatus: 'Aucun morceau généré. Saisissez une description pour commencer.',
@@ -155,6 +161,7 @@ const i18n = {
     duration: 'Durée',
     model: 'Modèle',
     idea: 'Idée',
+    publishedAt: 'Publié à',
     genres: ['Lo-fi', 'Pop', 'EDM', 'Cinématique', 'Jazz'],
     moods: ['Relax', 'Joyeux', 'Épique', 'Mélancolique', 'Énergique'],
     durations: ['30 secondes', '60 secondes', '90 secondes']
@@ -163,6 +170,69 @@ const i18n = {
 
 function fillSelect(selectNode, values) {
   selectNode.innerHTML = values.map((item) => `<option>${item}</option>`).join('');
+}
+
+function createGeneratedAudioUrl(seed = 1) {
+  const sampleRate = 22050;
+  const seconds = 2.4;
+  const samples = Math.floor(sampleRate * seconds);
+  const data = new Int16Array(samples);
+
+  const baseFreq = 220 + (seed % 5) * 55;
+  for (let i = 0; i < samples; i += 1) {
+    const t = i / sampleRate;
+    const env = Math.min(1, t * 3) * Math.max(0, 1 - t / seconds);
+    const signal =
+      Math.sin(2 * Math.PI * baseFreq * t) * 0.55 +
+      Math.sin(2 * Math.PI * baseFreq * 1.5 * t) * 0.25;
+    data[i] = Math.max(-1, Math.min(1, signal * env)) * 32767;
+  }
+
+  const headerSize = 44;
+  const buffer = new ArrayBuffer(headerSize + data.length * 2);
+  const view = new DataView(buffer);
+
+  function writeString(offset, str) {
+    for (let i = 0; i < str.length; i += 1) view.setUint8(offset + i, str.charCodeAt(i));
+  }
+
+  writeString(0, 'RIFF');
+  view.setUint32(4, 36 + data.length * 2, true);
+  writeString(8, 'WAVE');
+  writeString(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeString(36, 'data');
+  view.setUint32(40, data.length * 2, true);
+
+  let offset = 44;
+  for (let i = 0; i < data.length; i += 1, offset += 2) {
+    view.setInt16(offset, data[i], true);
+  }
+
+  return URL.createObjectURL(new Blob([buffer], { type: 'audio/wav' }));
+}
+
+function renderPublishedTracks(lang) {
+  const t = i18n[lang] || i18n.vi;
+  publishTitle.textContent = t.publishTitle;
+
+  if (publishedTracks.length === 0) {
+    publishedList.innerHTML = `<li>${t.publishEmpty}</li>`;
+    return;
+  }
+
+  publishedList.innerHTML = publishedTracks
+    .map(
+      (item) =>
+        `<li><strong>${item.title}</strong><br/><small>${t.publishedAt}: ${item.publishedAt}</small></li>`
+    )
+    .join('');
 }
 
 function applyLanguage(lang) {
@@ -190,31 +260,53 @@ function applyLanguage(lang) {
 
   promptInput.placeholder = t.promptPlaceholder;
   generateBtn.textContent = t.generate;
-  statusText.textContent = t.idleStatus;
+  publishBtn.textContent = t.publish;
+  statusText.textContent = trackCard.hidden ? t.idleStatus : t.done;
 
   fillSelect(genreSelect, t.genres);
   fillSelect(moodSelect, t.moods);
   fillSelect(durationSelect, t.durations);
+  renderPublishedTracks(lang);
 }
 
 function fakeGenerateMusic({ prompt, genre, mood, duration, model }) {
   return new Promise((resolve) => {
-    const randomTrack = demoTracks[Math.floor(Math.random() * demoTracks.length)];
+    const seed = prompt.length + genre.length + mood.length + duration.length;
+
     setTimeout(() => {
       resolve({
-        ...randomTrack,
+        title: `AI Track ${Math.floor(Math.random() * 1000)}`,
         genre,
         mood,
         duration,
         model,
-        description: prompt
+        description: prompt,
+        url: createGeneratedAudioUrl(seed)
       });
-    }, 1500);
+    }, 1200);
   });
 }
 
 languageSelect.addEventListener('change', () => {
   applyLanguage(languageSelect.value);
+});
+
+publishBtn.addEventListener('click', () => {
+  if (!latestTrack) return;
+
+  const lang = languageSelect.value;
+  const t = i18n[lang] || i18n.vi;
+  publishedTracks = [
+    {
+      title: latestTrack.title,
+      publishedAt: new Date().toLocaleString()
+    },
+    ...publishedTracks
+  ];
+
+  publishPanel.hidden = false;
+  renderPublishedTracks(lang);
+  statusText.textContent = t.publishDone;
 });
 
 form.addEventListener('submit', async (event) => {
@@ -228,6 +320,11 @@ form.addEventListener('submit', async (event) => {
   const duration = durationSelect.value;
   const model = modelSelect.value;
 
+  if (model === 'v1.0 Pro') {
+    statusText.textContent = 'Upgrade to Pro to use this model.';
+    return;
+  }
+
   if (!prompt) {
     statusText.textContent = t.emptyPrompt;
     return;
@@ -239,6 +336,7 @@ form.addEventListener('submit', async (event) => {
 
   const result = await fakeGenerateMusic({ prompt, genre, mood, duration, model });
 
+  latestTrack = result;
   trackTitle.textContent = result.title;
   trackMeta.textContent = `${t.meta}: ${result.genre} • ${t.mood}: ${result.mood} • ${t.duration}: ${result.duration} • ${t.model}: ${result.model} | ${t.idea}: ${result.description}`;
   audioPlayer.src = result.url;
