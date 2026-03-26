@@ -30,6 +30,12 @@ const loginBtn = document.getElementById('login-btn');
 const logoutBtn = document.getElementById('logout-btn');
 const authStatus = document.getElementById('auth-status');
 
+
+const requiredNodes = [form, statusText, trackCard, trackTitle, trackMeta, audioPlayer, generateBtn, publishBtn, publishedList, suggestionPanel, suggestionText, copySuggestionBtn, languageSelect, modelSelect, promptInput, genreSelect, moodSelect, durationSelect, usernameInput, passwordInput, registerBtn, loginBtn, logoutBtn, authStatus, creditsBig];
+if (requiredNodes.some((node) => !node)) {
+  throw new Error('UI is not fully loaded. Please open through http://localhost:8080');
+}
+
 let latestTrack = null;
 let token = localStorage.getItem('music_ai_token') || '';
 let currentUser = localStorage.getItem('music_ai_user') || '';

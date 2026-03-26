@@ -15,7 +15,14 @@ function hashPassword(password) {
   return crypto.createHash('sha256').update(password).digest('hex');
 }
 
+function setCors(res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+}
+
 function sendJson(res, code, payload) {
+  setCors(res);
   res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify(payload));
 }
@@ -125,6 +132,7 @@ function synthesizeArtwork(seedText, title) {
 }
 
 function serveStatic(req, res) {
+  setCors(res);
   const reqPath = req.url === '/' ? '/index.html' : decodeURIComponent(req.url.split('?')[0]);
   const filePath = path.resolve(ROOT, `.${reqPath}`);
 
@@ -161,10 +169,17 @@ function evictOldEntries(map, maxSize) {
 
 const server = http.createServer(async (req, res) => {
   try {
+    if (req.method === 'OPTIONS') {
+      setCors(res);
+      res.writeHead(204);
+      res.end();
+      return;
+    }
     if (req.method === 'GET' && req.url.startsWith('/api/audio/')) {
       const id = req.url.split('/api/audio/')[1]?.split('?')[0];
       const track = generatedTracks.get(id);
       if (!track) return sendJson(res, 404, { error: 'Track not found.' });
+      setCors(res);
       res.writeHead(200, { 'Content-Type': 'audio/wav', 'Cache-Control': 'no-store' });
       res.end(track.buffer);
       return;
@@ -174,9 +189,19 @@ const server = http.createServer(async (req, res) => {
       const id = req.url.split('/api/image/')[1]?.split('?')[0];
       const image = generatedImages.get(id);
       if (!image) return sendJson(res, 404, { error: 'Image not found.' });
+      setCors(res);
       res.writeHead(200, { 'Content-Type': 'image/svg+xml; charset=utf-8', 'Cache-Control': 'no-store' });
       res.end(image.svg);
       return;
+    }
+
+
+    if (req.url === '/api/register' && req.method !== 'POST') {
+      return sendJson(res, 405, { error: 'Method Not Allowed. Use POST /api/register.' });
+    }
+
+    if (req.url === '/api/login' && req.method !== 'POST') {
+      return sendJson(res, 405, { error: 'Method Not Allowed. Use POST /api/login.' });
     }
 
     if (req.method === 'POST' && req.url === '/api/register') {
