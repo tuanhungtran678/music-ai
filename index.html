@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Music Studio</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar" aria-label="Main menu">
+        <div class="logo">Alasta AI</div>
+
+        <nav class="menu" aria-label="Primary">
+          <button type="button" class="menu-item is-active" id="menu-home">Home</button>
+          <button type="button" class="menu-item" id="menu-create">Create</button>
+          <button type="button" class="menu-item" id="menu-studio">Studio</button>
+          <button type="button" class="menu-item" id="menu-explore">Explore</button>
+          <button type="button" class="menu-item" id="menu-library">Library</button>
+          <button type="button" class="menu-item" id="menu-settings">Settings</button>
+        </nav>
+
+        
+        <section class="auth-box">
+          <h3 id="auth-title">Account</h3>
+          <input id="username" type="text" placeholder="Username" />
+          <input id="password" type="password" placeholder="Password" />
+          <div class="auth-actions">
+            <button type="button" id="register-btn">Register</button>
+            <button type="button" id="login-btn">Login</button>
+            <button type="button" id="logout-btn">Logout</button>
+          </div>
+          <p id="auth-status">Not logged in.</p>
+        </section>
+
+        <label class="search-box">
+          <span id="search-label">Search</span>
+          <input id="search-input" type="search" placeholder="Search tracks, artists..." />
+        </label>
+      </aside>
+
+      <main class="app">
+        <header class="topbar">
+          <div class="credit-card" aria-label="Credits">
+            <span class="credit-icon">♪</span>
+            <strong id="credits-big">50</strong>
+          </div>
+          <div class="hero">
+            <p class="badge">🎵 AI Music Studio</p>
+            <h1 id="title">Tạo nhạc bằng AI trong vài giây</h1>
+            <p class="subtitle" id="subtitle">
+              Nhập ý tưởng, chọn phong cách và để AI tạo bản demo nhạc phù hợp cho bạn.
+            </p>
+          </div>
+        </header>
+
+        <section class="panel" aria-label="Trình tạo nhạc" id="generator-panel">
+          <form id="music-form" class="form-grid">
+            <div class="row">
+              <label>
+                <span id="language-label">Ngôn ngữ giao diện</span>
+                <select id="language">
+                  <option value="vi" selected>Tiếng Việt</option>
+                  <option value="en">English</option>
+                  <option value="fr">Français</option>
+                </select>
+              </label>
+
+              <label>
+                <span id="model-label">Model AI</span>
+                <select id="model">
+                  <option value="v1.0" selected>v1.0</option>
+                  <option value="v1.0 Pro">v1.0 Pro</option>
+                </select>
+              </label>
+            </div>
+
+            <label>
+              <span id="prompt-label">Mô tả bài nhạc</span>
+              <textarea
+                id="prompt"
+                placeholder="Ví dụ: Bài lo-fi chill cho buổi tối mưa, nhịp nhẹ, piano mềm"
+                required
+              ></textarea>
+            </label>
+
+            <div class="row">
+              <label>
+                <span id="genre-label">Thể loại</span>
+                <select id="genre"></select>
+              </label>
+
+              <label>
+                <span id="mood-label">Tâm trạng</span>
+                <select id="mood"></select>
+              </label>
+
+              <label>
+                <span id="duration-label">Độ dài</span>
+                <select id="duration"></select>
+              </label>
+            </div>
+
+            
+            <p class="credit-alert" id="credit-alert" hidden>Out of Credits</p>
+
+            <button type="submit" id="generate-btn">✨ Tạo nhạc</button>
+          </form>
+        </section>
+
+        <section class="panel" aria-live="polite" id="result-panel">
+          <h2 id="result-title">Bản nhạc AI của bạn</h2>
+          <p id="status">Chưa có bản nhạc nào. Hãy nhập mô tả để bắt đầu.</p>
+
+          <div class="track" hidden id="track-card">
+            <div class="track-layout">
+              <img id="track-art" alt="AI artwork" />
+              <div>
+                <h3 id="track-title"></h3>
+                <p id="track-meta"></p>
+                <audio id="audio-player" controls></audio>
+              </div>
+            </div>
+
+            <div class="publish-row">
+              <button type="button" id="publish-btn">📢 Publish</button>
+            </div>
+          </div>
+
+
+          <div class="suggestion-panel" hidden id="suggestion-panel">
+            <h3 id="suggestion-title">Đề xuất thay đổi</h3>
+            <p id="suggestion-text"></p>
+            <button type="button" id="copy-suggestion-btn">📋 Copy đề xuất</button>
+          </div>
+
+          <div class="publish-panel" hidden id="publish-panel">
+            <h3 id="publish-title">Published songs</h3>
+            <ul id="published-list"></ul>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer>
+      <small id="footer-note">
+        Demo giao diện tạo nhạc AI. Tích hợp API thật bằng cách thay phần mô phỏng trong
+        <code>script.js</code>.
+      </small>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
