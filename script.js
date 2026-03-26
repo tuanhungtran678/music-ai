@@ -117,16 +117,28 @@ const i18n = {
 
 function t() { return i18n[languageSelect.value] || i18n.vi; }
 
+const API_BASE = (() => {
+  if (window.location.protocol === 'file:') return 'http://localhost:8080';
+  if (window.location.hostname === 'localhost' && window.location.port === '8080') return window.location.origin;
+  return 'http://localhost:8080';
+})();
+
+function apiUrl(path) {
+  if (/^https?:\/\//.test(path)) return path;
+  return `${API_BASE}${path}`;
+}
+
 async function api(path, method = 'GET', body) {
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  const res = await fetch(apiUrl(path), { method, headers, body: body ? JSON.stringify(body) : undefined });
   const contentType = res.headers.get('content-type') || '';
   const raw = await res.text();
 
   if (!contentType.includes('application/json')) {
-    throw new Error('Server response is not JSON. Hãy chạy app bằng `node server.js` và mở đúng URL localhost.');
+    const hint = raw.slice(0, 40).replace(/\s+/g, ' ');
+    throw new Error(`API ${path} returned non-JSON response (${hint}). Hãy chạy: node server.js`);
   }
 
   const data = JSON.parse(raw);
