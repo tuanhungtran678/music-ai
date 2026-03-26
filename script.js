@@ -14,7 +14,7 @@ const suggestionPanel = document.getElementById('suggestion-panel');
 const suggestionTitle = document.getElementById('suggestion-title');
 const suggestionText = document.getElementById('suggestion-text');
 const copySuggestionBtn = document.getElementById('copy-suggestion-btn');
-const creditsStatus = document.getElementById('credits-status');
+const creditsBig = document.getElementById('credits-big');
 
 const languageSelect = document.getElementById('language');
 const modelSelect = document.getElementById('model');
@@ -33,7 +33,7 @@ const authStatus = document.getElementById('auth-status');
 let latestTrack = null;
 let token = localStorage.getItem('music_ai_token') || '';
 let currentUser = localStorage.getItem('music_ai_user') || '';
-let credits = Number(localStorage.getItem('music_ai_credits') || 0);
+let credits = Number(localStorage.getItem('music_ai_credits') || 50);
 
 const textNodes = {
   title: document.getElementById('title'),
@@ -114,8 +114,16 @@ function t() { return i18n[languageSelect.value] || i18n.vi; }
 async function api(path, method = 'GET', body) {
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers.Authorization = `Bearer ${token}`;
+
   const res = await fetch(path, { method, headers, body: body ? JSON.stringify(body) : undefined });
-  const data = await res.json();
+  const contentType = res.headers.get('content-type') || '';
+  const raw = await res.text();
+
+  if (!contentType.includes('application/json')) {
+    throw new Error('Server response is not JSON. Hãy chạy app bằng `node server.js` và mở đúng URL localhost.');
+  }
+
+  const data = JSON.parse(raw);
   if (!res.ok) throw new Error(data.error || 'Request failed');
   return data;
 }
@@ -125,7 +133,7 @@ function fillSelect(selectNode, values) {
 }
 
 function updateCreditView() {
-  creditsStatus.textContent = `${t().credits}: ${credits}`;
+  creditsBig.textContent = String(credits);
 }
 
 function updateAuthStatus() {
@@ -239,7 +247,7 @@ registerBtn.addEventListener('click', async () => {
   const username = usernameInput.value.trim();
   const password = passwordInput.value.trim();
   if (!username || !password) {
-    authStatus.textContent = 'Username và password không được để trống.';
+    authStatus.textContent = 'Username/password is required.';
     return;
   }
 
@@ -255,7 +263,7 @@ loginBtn.addEventListener('click', async () => {
   const username = usernameInput.value.trim();
   const password = passwordInput.value.trim();
   if (!username || !password) {
-    authStatus.textContent = 'Username và password không được để trống.';
+    authStatus.textContent = 'Username/password is required.';
     return;
   }
 

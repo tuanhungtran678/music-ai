@@ -80,9 +80,39 @@ body {
 .auth-actions button {
   border-radius: 9px; border: 1px solid var(--border); background: #1c1f3e; color: var(--text); padding: 0.5rem 0.4rem; cursor: pointer;
 }
-#auth-status, #credits-status { margin: 0.2rem 0 0; color: var(--muted); font-size: 0.85rem; }
+#auth-status { margin: 0.2rem 0 0; color: var(--muted); font-size: 0.85rem; }
 
 .app { display: grid; gap: 1.25rem; }
+
+.topbar {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+.credit-card {
+  height: 90px;
+  border-radius: 16px;
+  border: 1px solid rgba(127, 140, 255, 0.45);
+  background: linear-gradient(180deg, rgba(10,12,34,0.96), rgba(16,19,47,0.92));
+  display: grid;
+  place-items: center;
+  gap: 0.1rem;
+  box-shadow: inset 0 0 25px rgba(127, 140, 255, 0.12);
+}
+
+.credit-icon {
+  color: #9dc1ff;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+#credits-big {
+  font-size: 2rem;
+  line-height: 1;
+}
+
 .hero { text-align: center; }
 .badge {
   display: inline-block; padding: 0.35rem 0.8rem; border-radius: 999px; background: rgba(127, 140, 255, 0.2);
@@ -145,4 +175,5 @@ code { color: #86f7ff; }
   .sidebar { position: static; }
   .track-layout { grid-template-columns: 1fr; }
   #track-art { max-width: 220px; }
+  .topbar { grid-template-columns: 1fr; justify-items: center; }
 }

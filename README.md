@@ -5,7 +5,7 @@ Web demo tạo nhạc AI với **server thật** và **tài khoản người dù
 ## Tính năng
 
 - Đăng ký / đăng nhập tài khoản.
-- Hệ thống **Credits**: mỗi lần tạo nhạc sẽ trừ 1 credit.
+- Hệ thống **Credits**: mỗi tài khoản bắt đầu với 50 credits, mỗi lần tạo nhạc sẽ trừ 10 credits.
 - API server nội bộ (`server.js`) cho generate / publish / account.
 - Tự động tổng hợp nhạc trên server (không cần tệp `.wav` có sẵn).
 - Tạo ảnh minh họa theo prompt và hiển thị bên trái trong hộp bài hát.

@@ -31,7 +31,6 @@
             <button type="button" id="logout-btn">Logout</button>
           </div>
           <p id="auth-status">Not logged in.</p>
-          <p id="credits-status">Credits: 0</p>
         </section>
 
         <label class="search-box">
@@ -41,12 +40,18 @@
       </aside>
 
       <main class="app">
-        <header class="hero">
-          <p class="badge">🎵 AI Music Studio</p>
-          <h1 id="title">Tạo nhạc bằng AI trong vài giây</h1>
-          <p class="subtitle" id="subtitle">
-            Nhập ý tưởng, chọn phong cách và để AI tạo bản demo nhạc phù hợp cho bạn.
-          </p>
+        <header class="topbar">
+          <div class="credit-card" aria-label="Credits">
+            <span class="credit-icon">♪</span>
+            <strong id="credits-big">50</strong>
+          </div>
+          <div class="hero">
+            <p class="badge">🎵 AI Music Studio</p>
+            <h1 id="title">Tạo nhạc bằng AI trong vài giây</h1>
+            <p class="subtitle" id="subtitle">
+              Nhập ý tưởng, chọn phong cách và để AI tạo bản demo nhạc phù hợp cho bạn.
+            </p>
+          </div>
         </header>
 
         <section class="panel" aria-label="Trình tạo nhạc" id="generator-panel">

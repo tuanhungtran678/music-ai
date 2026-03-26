@@ -186,7 +186,7 @@ const server = http.createServer(async (req, res) => {
       if (!username || !password) return sendJson(res, 400, { error: 'Username and password are required.' });
       if (users.has(username)) return sendJson(res, 409, { error: 'Username already exists.' });
 
-      users.set(username, { username, passwordHash: hashPassword(password), published: [], credits: 20 });
+      users.set(username, { username, passwordHash: hashPassword(password), published: [], credits: 50 });
       return sendJson(res, 201, { message: 'Registered successfully.' });
     }
 
@@ -217,7 +217,7 @@ const server = http.createServer(async (req, res) => {
       if (body.model === 'v1.0 Pro') return sendJson(res, 403, { error: 'Upgrade to Pro to use this model.' });
       if (user.credits <= 0) return sendJson(res, 402, { error: 'Not enough credits.' });
 
-      user.credits -= 1;
+      user.credits -= 10;
       const title = `AI Track ${Math.floor(Math.random() * 9999)}`;
       const seedText = `${body.prompt || ''}|${body.genre || ''}|${body.mood || ''}|${body.duration || ''}|${Date.now()}`;
 
