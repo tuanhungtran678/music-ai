@@ -90,6 +90,48 @@ body {
   padding: 0.65rem 0.75rem;
 }
 
+.auth-box {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.8rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #12142a;
+}
+
+.auth-box h3 {
+  margin: 0 0 0.2rem;
+}
+
+.auth-box input {
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #0f1126;
+  color: var(--text);
+  padding: 0.6rem 0.7rem;
+}
+
+.auth-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+}
+
+.auth-actions button {
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: #1c1f3e;
+  color: var(--text);
+  padding: 0.5rem 0.4rem;
+  cursor: pointer;
+}
+
+#auth-status {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
 .app {
   display: grid;
   gap: 1.25rem;
@@ -185,6 +227,20 @@ textarea {
 
 .publish-row {
   margin-top: 0.75rem;
+}
+
+
+.suggestion-panel {
+  margin-top: 1rem;
+  padding: 0.85rem;
+  border-radius: 12px;
+  border: 1px solid rgba(127, 140, 255, 0.5);
+  background: rgba(127, 140, 255, 0.12);
+}
+
+.suggestion-panel p {
+  margin: 0.4rem 0 0.75rem;
+  color: var(--text);
 }
 
 .publish-panel {

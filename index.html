@@ -20,6 +20,19 @@
           <button type="button" class="menu-item" id="menu-settings">Settings</button>
         </nav>
 
+        
+        <section class="auth-box">
+          <h3 id="auth-title">Account</h3>
+          <input id="username" type="text" placeholder="Username" />
+          <input id="password" type="password" placeholder="Password" />
+          <div class="auth-actions">
+            <button type="button" id="register-btn">Register</button>
+            <button type="button" id="login-btn">Login</button>
+            <button type="button" id="logout-btn">Logout</button>
+          </div>
+          <p id="auth-status">Not logged in.</p>
+        </section>
+
         <label class="search-box">
           <span id="search-label">Search</span>
           <input id="search-input" type="search" placeholder="Search tracks, artists..." />
@@ -98,6 +111,13 @@
             <div class="publish-row">
               <button type="button" id="publish-btn">📢 Publish</button>
             </div>
+          </div>
+
+
+          <div class="suggestion-panel" hidden id="suggestion-panel">
+            <h3 id="suggestion-title">Đề xuất thay đổi</h3>
+            <p id="suggestion-text"></p>
+            <button type="button" id="copy-suggestion-btn">📋 Copy đề xuất</button>
           </div>
 
           <div class="publish-panel" hidden id="publish-panel">
