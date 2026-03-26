@@ -15,6 +15,7 @@ const suggestionTitle = document.getElementById('suggestion-title');
 const suggestionText = document.getElementById('suggestion-text');
 const copySuggestionBtn = document.getElementById('copy-suggestion-btn');
 const creditsBig = document.getElementById('credits-big');
+const creditAlert = document.getElementById('credit-alert');
 
 const languageSelect = document.getElementById('language');
 const modelSelect = document.getElementById('model');
@@ -31,7 +32,7 @@ const logoutBtn = document.getElementById('logout-btn');
 const authStatus = document.getElementById('auth-status');
 
 
-const requiredNodes = [form, statusText, trackCard, trackTitle, trackMeta, audioPlayer, generateBtn, publishBtn, publishedList, suggestionPanel, suggestionText, copySuggestionBtn, languageSelect, modelSelect, promptInput, genreSelect, moodSelect, durationSelect, usernameInput, passwordInput, registerBtn, loginBtn, logoutBtn, authStatus, creditsBig];
+const requiredNodes = [form, statusText, trackCard, trackTitle, trackMeta, audioPlayer, generateBtn, publishBtn, publishedList, suggestionPanel, suggestionText, copySuggestionBtn, languageSelect, modelSelect, promptInput, genreSelect, moodSelect, durationSelect, usernameInput, passwordInput, registerBtn, loginBtn, logoutBtn, authStatus, creditsBig, creditAlert];
 if (requiredNodes.some((node) => !node)) {
   throw new Error('UI is not fully loaded. Please open through http://localhost:8080');
 }
@@ -74,7 +75,7 @@ const i18n = {
     searchLabel: 'Search', searchPlaceholder: 'Tìm bài hát, nghệ sĩ...', authTitle: 'Tài khoản', login: 'Login', register: 'Register', logout: 'Logout',
     publish: '📢 Publish', publishTitle: 'Published songs', publishDone: 'Đã đăng bài hát thành công.', publishEmpty: 'Chưa có bài nào được đăng.',
     suggestionTitle: 'Đề xuất thay đổi', copySuggestion: '📋 Copy đề xuất', copyDone: 'Đã copy đề xuất vào clipboard.', copyFail: 'Không thể copy tự động. Hãy copy thủ công.',
-    credits: 'Credits', registerOk: 'Đăng ký thành công. Hãy đăng nhập.',
+    credits: 'Credits', registerOk: 'Đăng ký thành công. Hãy đăng nhập.', outOfCredits: 'Out of Credits',
     generate: '✨ Tạo nhạc', generating: 'Đang tạo...', idleStatus: 'Chưa có bản nhạc nào. Hãy nhập mô tả để bắt đầu.',
     emptyPrompt: 'Vui lòng nhập mô tả bài nhạc.', running: 'Server đang tạo nhạc...', done: 'Hoàn tất! Bạn có thể nghe thử bài hát.',
     loginRequired: 'Vui lòng đăng nhập trước.', authLoggedOut: 'Chưa đăng nhập.', authLoggedIn: 'Đã đăng nhập:',
@@ -90,7 +91,7 @@ const i18n = {
     searchLabel: 'Search', searchPlaceholder: 'Search tracks, artists...', authTitle: 'Account', login: 'Login', register: 'Register', logout: 'Logout',
     publish: '📢 Publish', publishTitle: 'Published songs', publishDone: 'Song published successfully.', publishEmpty: 'No published songs yet.',
     suggestionTitle: 'Suggested changes', copySuggestion: '📋 Copy suggestion', copyDone: 'Suggestion copied to clipboard.', copyFail: 'Cannot auto-copy. Please copy manually.',
-    credits: 'Credits', registerOk: 'Registered successfully. Please login.',
+    credits: 'Credits', registerOk: 'Registered successfully. Please login.', outOfCredits: 'Out of Credits',
     generate: '✨ Generate music', generating: 'Generating...', idleStatus: 'No track generated yet. Enter a prompt to begin.',
     emptyPrompt: 'Please enter a music prompt.', running: 'Server is generating your song...', done: 'Done! You can listen to the song.',
     loginRequired: 'Please login first.', authLoggedOut: 'Not logged in.', authLoggedIn: 'Logged in as',
@@ -106,7 +107,7 @@ const i18n = {
     searchLabel: 'Recherche', searchPlaceholder: 'Rechercher des titres, artistes...', authTitle: 'Compte', login: 'Connexion', register: 'Inscription', logout: 'Déconnexion',
     publish: '📢 Publier', publishTitle: 'Morceaux publiés', publishDone: 'Morceau publié avec succès.', publishEmpty: 'Aucun morceau publié.',
     suggestionTitle: 'Suggestions de modification', copySuggestion: '📋 Copier la suggestion', copyDone: 'Suggestion copiée dans le presse-papiers.', copyFail: 'Copie automatique impossible. Copiez manuellement.',
-    credits: 'Crédits', registerOk: 'Inscription réussie. Connectez-vous.',
+    credits: 'Crédits', registerOk: 'Inscription réussie. Connectez-vous.', outOfCredits: 'Crédits épuisés',
     generate: '✨ Générer de la musique', generating: 'Génération...', idleStatus: 'Aucun morceau généré. Saisissez une description.',
     emptyPrompt: 'Veuillez saisir une description musicale.', running: 'Le serveur génère votre morceau...', done: 'Terminé ! Vous pouvez écouter le morceau.',
     loginRequired: 'Veuillez vous connecter.', authLoggedOut: 'Non connecté.', authLoggedIn: 'Connecté en tant que',
@@ -132,7 +133,12 @@ async function api(path, method = 'GET', body) {
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(apiUrl(path), { method, headers, body: body ? JSON.stringify(body) : undefined });
+  let res;
+  try {
+    res = await fetch(apiUrl(path), { method, headers, body: body ? JSON.stringify(body) : undefined });
+  } catch {
+    throw new Error('Failed to fetch. Hãy bật server bằng `node server.js` và kiểm tra cổng 8080.');
+  }
   const contentType = res.headers.get('content-type') || '';
   const raw = await res.text();
 
@@ -152,6 +158,24 @@ function fillSelect(selectNode, values) {
 
 function updateCreditView() {
   creditsBig.textContent = String(credits);
+  updateGenerateButtonState();
+}
+
+
+function updateGenerateButtonState() {
+  const noCredits = credits <= 0;
+  creditAlert.hidden = !noCredits;
+  creditAlert.textContent = t().outOfCredits;
+
+  if (noCredits) {
+    generateBtn.classList.add('out-of-credits');
+    generateBtn.disabled = true;
+    generateBtn.textContent = t().outOfCredits;
+  } else {
+    generateBtn.classList.remove('out-of-credits');
+    generateBtn.disabled = false;
+    generateBtn.textContent = t().generate;
+  }
 }
 
 function updateAuthStatus() {
@@ -338,6 +362,12 @@ form.addEventListener('submit', async (event) => {
     return;
   }
 
+  if (credits <= 0) {
+    statusText.textContent = L.outOfCredits;
+    updateGenerateButtonState();
+    return;
+  }
+
   const prompt = promptInput.value.trim();
   if (!prompt) {
     statusText.textContent = L.emptyPrompt;
@@ -375,8 +405,7 @@ form.addEventListener('submit', async (event) => {
   } catch (err) {
     statusText.textContent = err.message;
   } finally {
-    generateBtn.disabled = false;
-    generateBtn.textContent = L.generate;
+    updateGenerateButtonState();
   }
 });
 

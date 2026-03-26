@@ -139,6 +139,24 @@ textarea { resize: vertical; min-height: 110px; }
 }
 #generate-btn:hover, #publish-btn:hover { filter: brightness(1.08); }
 
+.credit-alert {
+  margin: 0;
+  padding: 0.55rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 70, 70, 0.55);
+  background: rgba(255, 46, 46, 0.16);
+  color: #ff9898;
+  font-weight: 700;
+  text-align: center;
+}
+
+#generate-btn.out-of-credits {
+  background: linear-gradient(90deg, #a52a2a, #e53935);
+  color: #fff;
+  cursor: not-allowed;
+}
+
+
 .track {
   margin-top: 1rem; padding: 0.85rem; border-radius: 12px; background: rgba(83, 216, 251, 0.08); border: 1px solid rgba(83, 216, 251, 0.25);
 }
