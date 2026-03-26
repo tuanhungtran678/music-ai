@@ -31,6 +31,7 @@
             <button type="button" id="logout-btn">Logout</button>
           </div>
           <p id="auth-status">Not logged in.</p>
+          <p id="credits-status">Credits: 0</p>
         </section>
 
         <label class="search-box">
@@ -104,9 +105,14 @@
           <p id="status">Chưa có bản nhạc nào. Hãy nhập mô tả để bắt đầu.</p>
 
           <div class="track" hidden id="track-card">
-            <h3 id="track-title"></h3>
-            <p id="track-meta"></p>
-            <audio id="audio-player" controls></audio>
+            <div class="track-layout">
+              <img id="track-art" alt="AI artwork" />
+              <div>
+                <h3 id="track-title"></h3>
+                <p id="track-meta"></p>
+                <audio id="audio-player" controls></audio>
+              </div>
+            </div>
 
             <div class="publish-row">
               <button type="button" id="publish-btn">📢 Publish</button>

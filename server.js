@@ -9,6 +9,7 @@ const ROOT = __dirname;
 const users = new Map();
 const tokens = new Map();
 const generatedTracks = new Map();
+const generatedImages = new Map();
 
 function hashPassword(password) {
   return crypto.createHash('sha256').update(password).digest('hex');
@@ -101,6 +102,28 @@ function synthesizeTrack(seedText) {
   return buffer;
 }
 
+function synthesizeArtwork(seedText, title) {
+  const hash = crypto.createHash('sha256').update(seedText).digest('hex');
+  const c1 = `#${hash.slice(0, 6)}`;
+  const c2 = `#${hash.slice(6, 12)}`;
+  const c3 = `#${hash.slice(12, 18)}`;
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="280" viewBox="0 0 280 280">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${c1}"/>
+      <stop offset="50%" stop-color="${c2}"/>
+      <stop offset="100%" stop-color="${c3}"/>
+    </linearGradient>
+  </defs>
+  <rect width="280" height="280" rx="24" fill="url(#g)"/>
+  <circle cx="70" cy="80" r="40" fill="rgba(255,255,255,0.18)"/>
+  <circle cx="210" cy="190" r="56" fill="rgba(0,0,0,0.20)"/>
+  <text x="20" y="248" fill="white" font-size="18" font-family="Arial, sans-serif">${title.slice(0, 24)}</text>
+</svg>`;
+}
+
 function serveStatic(req, res) {
   const reqPath = req.url === '/' ? '/index.html' : decodeURIComponent(req.url.split('?')[0]);
   const filePath = path.resolve(ROOT, `.${reqPath}`);
@@ -130,18 +153,29 @@ function serveStatic(req, res) {
   });
 }
 
+function evictOldEntries(map, maxSize) {
+  if (map.size <= maxSize) return;
+  const oldestKey = [...map.entries()].sort((a, b) => a[1].createdAt - b[1].createdAt)[0][0];
+  map.delete(oldestKey);
+}
+
 const server = http.createServer(async (req, res) => {
   try {
     if (req.method === 'GET' && req.url.startsWith('/api/audio/')) {
       const id = req.url.split('/api/audio/')[1]?.split('?')[0];
       const track = generatedTracks.get(id);
       if (!track) return sendJson(res, 404, { error: 'Track not found.' });
-
-      res.writeHead(200, {
-        'Content-Type': 'audio/wav',
-        'Cache-Control': 'no-store'
-      });
+      res.writeHead(200, { 'Content-Type': 'audio/wav', 'Cache-Control': 'no-store' });
       res.end(track.buffer);
+      return;
+    }
+
+    if (req.method === 'GET' && req.url.startsWith('/api/image/')) {
+      const id = req.url.split('/api/image/')[1]?.split('?')[0];
+      const image = generatedImages.get(id);
+      if (!image) return sendJson(res, 404, { error: 'Image not found.' });
+      res.writeHead(200, { 'Content-Type': 'image/svg+xml; charset=utf-8', 'Cache-Control': 'no-store' });
+      res.end(image.svg);
       return;
     }
 
@@ -152,7 +186,7 @@ const server = http.createServer(async (req, res) => {
       if (!username || !password) return sendJson(res, 400, { error: 'Username and password are required.' });
       if (users.has(username)) return sendJson(res, 409, { error: 'Username already exists.' });
 
-      users.set(username, { username, passwordHash: hashPassword(password), published: [] });
+      users.set(username, { username, passwordHash: hashPassword(password), published: [], credits: 20 });
       return sendJson(res, 201, { message: 'Registered successfully.' });
     }
 
@@ -164,16 +198,15 @@ const server = http.createServer(async (req, res) => {
       if (!user || user.passwordHash !== hashPassword(password)) {
         return sendJson(res, 401, { error: 'Invalid username or password.' });
       }
-
       const token = crypto.randomBytes(24).toString('hex');
       tokens.set(token, username);
-      return sendJson(res, 200, { token, username });
+      return sendJson(res, 200, { token, username, credits: user.credits });
     }
 
     if (req.method === 'GET' && req.url === '/api/me') {
       const user = authUser(req);
       if (!user) return sendJson(res, 401, { error: 'Unauthorized.' });
-      return sendJson(res, 200, { username: user.username });
+      return sendJson(res, 200, { username: user.username, credits: user.credits });
     }
 
     if (req.method === 'POST' && req.url === '/api/generate') {
@@ -182,40 +215,42 @@ const server = http.createServer(async (req, res) => {
 
       const body = await parseBody(req);
       if (body.model === 'v1.0 Pro') return sendJson(res, 403, { error: 'Upgrade to Pro to use this model.' });
+      if (user.credits <= 0) return sendJson(res, 402, { error: 'Not enough credits.' });
 
+      user.credits -= 1;
       const title = `AI Track ${Math.floor(Math.random() * 9999)}`;
-      const id = crypto.randomBytes(10).toString('hex');
       const seedText = `${body.prompt || ''}|${body.genre || ''}|${body.mood || ''}|${body.duration || ''}|${Date.now()}`;
-      const audioBuffer = synthesizeTrack(seedText);
 
-      generatedTracks.set(id, { id, title, buffer: audioBuffer, createdAt: Date.now() });
+      const trackId = crypto.randomBytes(10).toString('hex');
+      generatedTracks.set(trackId, { id: trackId, title, buffer: synthesizeTrack(seedText), createdAt: Date.now() });
+      evictOldEntries(generatedTracks, 100);
 
-      if (generatedTracks.size > 100) {
-        const oldestKey = [...generatedTracks.entries()].sort((a, b) => a[1].createdAt - b[1].createdAt)[0][0];
-        generatedTracks.delete(oldestKey);
-      }
+      const imageId = crypto.randomBytes(10).toString('hex');
+      generatedImages.set(imageId, { id: imageId, svg: synthesizeArtwork(seedText, title), createdAt: Date.now() });
+      evictOldEntries(generatedImages, 100);
 
       return sendJson(res, 200, {
         track: {
           title,
-          url: `/api/audio/${id}`,
+          url: `/api/audio/${trackId}`,
+          imageUrl: `/api/image/${imageId}`,
           genre: body.genre || 'Lo-fi',
           mood: body.mood || 'Relaxed',
           duration: body.duration || '60 seconds',
           model: body.model || 'v1.0',
           description: body.prompt || ''
-        }
+        },
+        credits: user.credits
       });
     }
 
     if (req.method === 'POST' && req.url === '/api/publish') {
       const user = authUser(req);
       if (!user) return sendJson(res, 401, { error: 'Please login first.' });
-
       const body = await parseBody(req);
       if (!body.title || !body.url) return sendJson(res, 400, { error: 'Missing track data.' });
 
-      const item = { title: body.title, url: body.url, publishedAt: new Date().toISOString() };
+      const item = { title: body.title, url: body.url, imageUrl: body.imageUrl || '', publishedAt: new Date().toISOString() };
       user.published.unshift(item);
       return sendJson(res, 201, { message: 'Published successfully.', item });
     }
@@ -223,7 +258,7 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && req.url === '/api/published') {
       const user = authUser(req);
       if (!user) return sendJson(res, 401, { error: 'Please login first.' });
-      return sendJson(res, 200, { items: user.published });
+      return sendJson(res, 200, { items: user.published, credits: user.credits });
     }
 
     serveStatic(req, res);

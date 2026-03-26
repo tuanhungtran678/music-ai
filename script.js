@@ -3,6 +3,7 @@ const statusText = document.getElementById('status');
 const trackCard = document.getElementById('track-card');
 const trackTitle = document.getElementById('track-title');
 const trackMeta = document.getElementById('track-meta');
+const trackArt = document.getElementById('track-art');
 const audioPlayer = document.getElementById('audio-player');
 const generateBtn = document.getElementById('generate-btn');
 const publishBtn = document.getElementById('publish-btn');
@@ -13,6 +14,7 @@ const suggestionPanel = document.getElementById('suggestion-panel');
 const suggestionTitle = document.getElementById('suggestion-title');
 const suggestionText = document.getElementById('suggestion-text');
 const copySuggestionBtn = document.getElementById('copy-suggestion-btn');
+const creditsStatus = document.getElementById('credits-status');
 
 const languageSelect = document.getElementById('language');
 const modelSelect = document.getElementById('model');
@@ -31,6 +33,7 @@ const authStatus = document.getElementById('auth-status');
 let latestTrack = null;
 let token = localStorage.getItem('music_ai_token') || '';
 let currentUser = localStorage.getItem('music_ai_user') || '';
+let credits = Number(localStorage.getItem('music_ai_credits') || 0);
 
 const textNodes = {
   title: document.getElementById('title'),
@@ -57,23 +60,15 @@ const textNodes = {
 
 const i18n = {
   vi: {
-    title: 'Tạo nhạc bằng AI trong vài giây',
-    subtitle: 'Đăng nhập tài khoản, nhập ý tưởng và tạo bài hát thật từ server.',
-    panelLabel: 'Trình tạo nhạc',
-    languageLabel: 'Ngôn ngữ giao diện',
-    modelLabel: 'Model AI',
-    promptLabel: 'Mô tả bài nhạc',
-    promptPlaceholder: 'Ví dụ: Bài lo-fi chill cho buổi tối mưa, nhịp nhẹ, piano mềm',
-    genreLabel: 'Thể loại',
-    moodLabel: 'Tâm trạng',
-    durationLabel: 'Độ dài',
-    resultTitle: 'Bản nhạc AI của bạn',
-    footer: 'Demo có server + tài khoản. API chạy trong server.js.',
+    title: 'Tạo nhạc bằng AI trong vài giây', subtitle: 'Đăng nhập tài khoản, nhập ý tưởng và tạo bài hát thật từ server.',
+    panelLabel: 'Trình tạo nhạc', languageLabel: 'Ngôn ngữ giao diện', modelLabel: 'Model AI', promptLabel: 'Mô tả bài nhạc',
+    promptPlaceholder: 'Ví dụ: Bài lo-fi chill cho buổi tối mưa, nhịp nhẹ, piano mềm', genreLabel: 'Thể loại', moodLabel: 'Tâm trạng', durationLabel: 'Độ dài',
+    resultTitle: 'Bản nhạc AI của bạn', footer: 'Demo có server + tài khoản. API chạy trong server.js.',
     menuHome: 'Home', menuCreate: 'Create', menuStudio: 'Studio', menuExplore: 'Explore', menuLibrary: 'Library', menuSettings: 'Settings',
-    searchLabel: 'Search', searchPlaceholder: 'Tìm bài hát, nghệ sĩ...',
-    authTitle: 'Tài khoản', login: 'Login', register: 'Register', logout: 'Logout',
+    searchLabel: 'Search', searchPlaceholder: 'Tìm bài hát, nghệ sĩ...', authTitle: 'Tài khoản', login: 'Login', register: 'Register', logout: 'Logout',
     publish: '📢 Publish', publishTitle: 'Published songs', publishDone: 'Đã đăng bài hát thành công.', publishEmpty: 'Chưa có bài nào được đăng.',
     suggestionTitle: 'Đề xuất thay đổi', copySuggestion: '📋 Copy đề xuất', copyDone: 'Đã copy đề xuất vào clipboard.', copyFail: 'Không thể copy tự động. Hãy copy thủ công.',
+    credits: 'Credits', registerOk: 'Đăng ký thành công. Hãy đăng nhập.',
     generate: '✨ Tạo nhạc', generating: 'Đang tạo...', idleStatus: 'Chưa có bản nhạc nào. Hãy nhập mô tả để bắt đầu.',
     emptyPrompt: 'Vui lòng nhập mô tả bài nhạc.', running: 'Server đang tạo nhạc...', done: 'Hoàn tất! Bạn có thể nghe thử bài hát.',
     loginRequired: 'Vui lòng đăng nhập trước.', authLoggedOut: 'Chưa đăng nhập.', authLoggedIn: 'Đã đăng nhập:',
@@ -89,6 +84,7 @@ const i18n = {
     searchLabel: 'Search', searchPlaceholder: 'Search tracks, artists...', authTitle: 'Account', login: 'Login', register: 'Register', logout: 'Logout',
     publish: '📢 Publish', publishTitle: 'Published songs', publishDone: 'Song published successfully.', publishEmpty: 'No published songs yet.',
     suggestionTitle: 'Suggested changes', copySuggestion: '📋 Copy suggestion', copyDone: 'Suggestion copied to clipboard.', copyFail: 'Cannot auto-copy. Please copy manually.',
+    credits: 'Credits', registerOk: 'Registered successfully. Please login.',
     generate: '✨ Generate music', generating: 'Generating...', idleStatus: 'No track generated yet. Enter a prompt to begin.',
     emptyPrompt: 'Please enter a music prompt.', running: 'Server is generating your song...', done: 'Done! You can listen to the song.',
     loginRequired: 'Please login first.', authLoggedOut: 'Not logged in.', authLoggedIn: 'Logged in as',
@@ -104,6 +100,7 @@ const i18n = {
     searchLabel: 'Recherche', searchPlaceholder: 'Rechercher des titres, artistes...', authTitle: 'Compte', login: 'Connexion', register: 'Inscription', logout: 'Déconnexion',
     publish: '📢 Publier', publishTitle: 'Morceaux publiés', publishDone: 'Morceau publié avec succès.', publishEmpty: 'Aucun morceau publié.',
     suggestionTitle: 'Suggestions de modification', copySuggestion: '📋 Copier la suggestion', copyDone: 'Suggestion copiée dans le presse-papiers.', copyFail: 'Copie automatique impossible. Copiez manuellement.',
+    credits: 'Crédits', registerOk: 'Inscription réussie. Connectez-vous.',
     generate: '✨ Générer de la musique', generating: 'Génération...', idleStatus: 'Aucun morceau généré. Saisissez une description.',
     emptyPrompt: 'Veuillez saisir une description musicale.', running: 'Le serveur génère votre morceau...', done: 'Terminé ! Vous pouvez écouter le morceau.',
     loginRequired: 'Veuillez vous connecter.', authLoggedOut: 'Non connecté.', authLoggedIn: 'Connecté en tant que',
@@ -127,43 +124,57 @@ function fillSelect(selectNode, values) {
   selectNode.innerHTML = values.map((item) => `<option>${item}</option>`).join('');
 }
 
+function updateCreditView() {
+  creditsStatus.textContent = `${t().credits}: ${credits}`;
+}
+
 function updateAuthStatus() {
   authStatus.textContent = currentUser ? `${t().authLoggedIn} ${currentUser}` : t().authLoggedOut;
+  updateCreditView();
 }
 
 async function loadPublished() {
   if (!token) {
     publishedList.innerHTML = `<li>${t().publishEmpty}</li>`;
+    publishPanel.hidden = false;
     return;
   }
   try {
     const data = await api('/api/published');
+    if (typeof data.credits === 'number') {
+      credits = data.credits;
+      localStorage.setItem('music_ai_credits', String(credits));
+      updateCreditView();
+    }
     const items = data.items || [];
     if (items.length === 0) {
       publishedList.innerHTML = `<li>${t().publishEmpty}</li>`;
+      publishPanel.hidden = false;
       return;
     }
-    publishedList.innerHTML = items
-      .map((item) => `<li><strong>${item.title}</strong><br/><small>${t().publishedAt}: ${new Date(item.publishedAt).toLocaleString()}</small></li>`)
-      .join('');
+    publishedList.innerHTML = items.map((item) => `<li><strong>${item.title}</strong><br/><small>${t().publishedAt}: ${new Date(item.publishedAt).toLocaleString()}</small></li>`).join('');
     publishPanel.hidden = false;
   } catch {
     publishedList.innerHTML = `<li>${t().publishEmpty}</li>`;
+    publishPanel.hidden = false;
   }
 }
-
 
 async function syncSession() {
   if (!token) return;
   try {
     const me = await api('/api/me');
     currentUser = me.username || currentUser;
+    credits = Number(me.credits || credits);
     localStorage.setItem('music_ai_user', currentUser);
+    localStorage.setItem('music_ai_credits', String(credits));
   } catch {
     token = '';
     currentUser = '';
+    credits = 0;
     localStorage.removeItem('music_ai_token');
     localStorage.removeItem('music_ai_user');
+    localStorage.removeItem('music_ai_credits');
   }
 }
 
@@ -209,7 +220,6 @@ async function applyLanguage() {
   await loadPublished();
 }
 
-
 function buildSuggestion(track) {
   return `Thử tăng dynamics cho phần drop, thêm lớp pad ở nền và tăng độ dài outro cho track "${track.title}".`;
 }
@@ -217,7 +227,6 @@ function buildSuggestion(track) {
 copySuggestionBtn.addEventListener('click', async () => {
   const text = suggestionText.textContent.trim();
   if (!text) return;
-
   try {
     await navigator.clipboard.writeText(text);
     statusText.textContent = t().copyDone;
@@ -227,21 +236,37 @@ copySuggestionBtn.addEventListener('click', async () => {
 });
 
 registerBtn.addEventListener('click', async () => {
+  const username = usernameInput.value.trim();
+  const password = passwordInput.value.trim();
+  if (!username || !password) {
+    authStatus.textContent = 'Username và password không được để trống.';
+    return;
+  }
+
   try {
-    await api('/api/register', 'POST', { username: usernameInput.value, password: passwordInput.value });
-    authStatus.textContent = 'Registered successfully. Please login.';
+    await api('/api/register', 'POST', { username, password });
+    authStatus.textContent = t().registerOk;
   } catch (err) {
     authStatus.textContent = err.message;
   }
 });
 
 loginBtn.addEventListener('click', async () => {
+  const username = usernameInput.value.trim();
+  const password = passwordInput.value.trim();
+  if (!username || !password) {
+    authStatus.textContent = 'Username và password không được để trống.';
+    return;
+  }
+
   try {
-    const data = await api('/api/login', 'POST', { username: usernameInput.value, password: passwordInput.value });
+    const data = await api('/api/login', 'POST', { username, password });
     token = data.token;
     currentUser = data.username;
+    credits = Number(data.credits || credits);
     localStorage.setItem('music_ai_token', token);
     localStorage.setItem('music_ai_user', currentUser);
+    localStorage.setItem('music_ai_credits', String(credits));
     updateAuthStatus();
     await loadPublished();
   } catch (err) {
@@ -252,8 +277,10 @@ loginBtn.addEventListener('click', async () => {
 logoutBtn.addEventListener('click', () => {
   token = '';
   currentUser = '';
+  credits = 0;
   localStorage.removeItem('music_ai_token');
   localStorage.removeItem('music_ai_user');
+  localStorage.removeItem('music_ai_credits');
   updateAuthStatus();
 });
 
@@ -264,7 +291,7 @@ publishBtn.addEventListener('click', async () => {
   }
 
   try {
-    await api('/api/publish', 'POST', { title: latestTrack.title, url: latestTrack.url });
+    await api('/api/publish', 'POST', { title: latestTrack.title, url: latestTrack.url, imageUrl: latestTrack.imageUrl });
     statusText.textContent = t().publishDone;
     await loadPublished();
   } catch (err) {
@@ -273,10 +300,7 @@ publishBtn.addEventListener('click', async () => {
 });
 
 languageSelect.addEventListener('change', () => {
-  (async () => {
-  await syncSession();
-  await applyLanguage();
-})();
+  applyLanguage();
 });
 
 form.addEventListener('submit', async (event) => {
@@ -308,9 +332,16 @@ form.addEventListener('submit', async (event) => {
     });
 
     latestTrack = data.track;
+    if (typeof data.credits === 'number') {
+      credits = data.credits;
+      localStorage.setItem('music_ai_credits', String(credits));
+      updateCreditView();
+    }
+
     trackTitle.textContent = latestTrack.title;
     trackMeta.textContent = `${L.meta}: ${latestTrack.genre} • ${L.mood}: ${latestTrack.mood} • ${L.duration}: ${latestTrack.duration} • ${L.model}: ${latestTrack.model} | ${L.idea}: ${latestTrack.description}`;
     audioPlayer.src = latestTrack.url;
+    trackArt.src = latestTrack.imageUrl;
     trackCard.hidden = false;
     suggestionText.textContent = buildSuggestion(latestTrack);
     suggestionPanel.hidden = false;
